@@ -1,4 +1,9 @@
-import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  PayloadAction,
+  createAsyncThunk,
+  createEntityAdapter,
+} from "@reduxjs/toolkit";
 import validateProduct from "../fake.api";
 import { RootState } from "../store";
 
@@ -14,7 +19,6 @@ export enum ValidationState {
   Rejected,
 }
 interface ProductSliceState {
-  products: Product[];
   validationState?: ValidationState;
   errorMessage?: string;
 }
@@ -32,34 +36,35 @@ const initialProducts: Product[] = [
   { title: "초기 상품2", price: 30000, id: "test2" },
 ];
 
-const initialState: ProductSliceState = {
-  products: initialProducts,
-  validationState: undefined,
+const productAdapter = createEntityAdapter<Product>();
+const initialState = productAdapter.getInitialState<ProductSliceState>({
   errorMessage: undefined,
-};
+  validationState: undefined,
+});
+
+const filledInitialState = productAdapter.upsertMany(
+  initialState,
+  initialProducts
+);
 
 const productsSlice = createSlice({
   name: "products",
-  initialState,
+  initialState: filledInitialState,
   reducers: {
     addProduct: (state, action: PayloadAction<Product>) => {
       // return [...state, action.payload];
-      state.products.push(action.payload);
+      productAdapter.upsertOne(state, action.payload);
     },
-    removeProduct: (state, action: PayloadAction<string>) => ({
-      ...state,
-      products: state.products.filter(
-        (product) => product.id !== action.payload
-      ),
-    }),
+    removeProduct: (state, action: PayloadAction<string>) => {
+      productAdapter.removeOne(state, action.payload);
+    },
   },
   extraReducers: (builder) => {
-    builder.addCase(addProductAsync.fulfilled, (state, action) => ({
-      ...state,
-      validationState: ValidationState.FulFilled,
-      errorMessage: undefined,
-      products: [...state.products, action.payload],
-    }));
+    builder.addCase(addProductAsync.fulfilled, (state, action) => {
+      productAdapter.upsertOne(state, action.payload);
+      state.validationState = ValidationState.FulFilled;
+      state.errorMessage = undefined;
+    });
     builder.addCase(addProductAsync.rejected, (state, action) => ({
       ...state,
       validationState: ValidationState.Rejected,
@@ -76,5 +81,15 @@ export const { addProduct, removeProduct } = productsSlice.actions;
 
 //useSelector할때 사용해서 상태값 불러옴
 export const getProductsSelector = (state: RootState) =>
-  state.products.products;
+  state.products.entities;
+export const getErrorMessage = (state: RootState) =>
+  state.products.errorMessage;
+
+export const {
+  selectAll: selectAllProducts,
+  selectById: selectProductById,
+  selectEntities: selectProductEnitities,
+  selectIds: selectProductIds,
+  selectTotal: selectTotalProducts,
+} = productAdapter.getSelectors<RootState>((state) => state.products);
 export default productsSlice.reducer;

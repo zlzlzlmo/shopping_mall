@@ -1,11 +1,26 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { getProductsSelector } from "./products.slice";
+import {
+  getProductsSelector,
+  selectAllProducts,
+  selectProductById,
+  selectProductEnitities,
+  selectTotalProducts,
+  selectProductIds,
+} from "./products.slice";
 import { useAppDispatch, useAppSelect } from "../store.hooks";
 import { removeProduct, Product } from "./products.slice";
 import { addToCart } from "../Cart/cart.slice";
+import { RootState } from "../store";
 const ProductsList: React.FC = () => {
-  const products = useAppSelect(getProductsSelector);
+  const products = useSelector(selectAllProducts);
+  const etf = useSelector<RootState>((state) =>
+    selectProductById(state, "etf")
+  );
+  const totalNumberOfProducts = useSelector(selectTotalProducts);
+  const productids = useSelector(selectProductIds);
+  const entities = useSelector(selectProductEnitities);
+
   const dispatch = useAppDispatch();
   const removeFromStore = (id: string) => {
     dispatch(removeProduct(id));

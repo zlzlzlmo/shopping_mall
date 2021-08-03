@@ -1,9 +1,16 @@
 import React from "react";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import { useAppDispatch } from "../store.hooks";
-import { addProduct, Product, addProductAsync } from "./products.slice";
+import {
+  addProduct,
+  Product,
+  addProductAsync,
+  getErrorMessage,
+} from "./products.slice";
 const ProductForm: React.FC = () => {
   const dispatch = useAppDispatch();
+  const errorMessage = useSelector(getErrorMessage);
   const [product, setProduct] = useState<Product>({
     id: "",
     title: "",
@@ -19,6 +26,9 @@ const ProductForm: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     dispatch(addProductAsync(product));
+    if (errorMessage) {
+      alert(errorMessage);
+    }
   };
   return (
     <>
