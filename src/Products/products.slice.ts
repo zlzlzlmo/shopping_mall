@@ -18,12 +18,17 @@ const productsSlice = createSlice({
   initialState,
   reducers: {
     addProduct: (state, action: PayloadAction<Product>) => {
-      console.log("addProduct", state);
       return [...state, action.payload];
+    },
+    removeProduct: (state, action: PayloadAction<string>) => {
+      const newState = state.filter((value) => {
+        return value.id !== action.payload;
+      });
+      return newState;
     },
   },
 });
-export const { addProduct } = productsSlice.actions;
+export const { addProduct, removeProduct } = productsSlice.actions;
 
 //useSelector할때 사용해서 상태값 불러옴
 export const getProductsSelector = (state: RootState) => state.products;
