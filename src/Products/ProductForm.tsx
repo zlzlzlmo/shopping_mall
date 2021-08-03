@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { useAppDispatch } from "../store.hooks";
-import { addProduct, Product } from "./products.slice";
+import { addProduct, Product, addProductAsync } from "./products.slice";
 const ProductForm: React.FC = () => {
   const dispatch = useAppDispatch();
   const [product, setProduct] = useState<Product>({
@@ -18,7 +18,7 @@ const ProductForm: React.FC = () => {
   // });
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(addProduct(product));
+    dispatch(addProductAsync(product));
   };
   return (
     <>
